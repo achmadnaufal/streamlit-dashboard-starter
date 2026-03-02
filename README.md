@@ -45,3 +45,8 @@ streamlit-dashboard-starter/
 ## License
 
 MIT License — free to use, modify, and distribute.
+
+## 🚀 New Features (2026-03-02)
+- Add custom theme engine and real-time metric alerts
+- Enhanced error handling and edge case coverage
+- Comprehensive unit tests and integration examples
