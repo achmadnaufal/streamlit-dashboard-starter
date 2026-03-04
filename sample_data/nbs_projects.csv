@@ -1,0 +1,9 @@
+project_id,project_name,country,intervention_type,area_ha,species_planted,carbon_credits_issued,biodiversity_score,period,status,verifier
+NBS-TH-01,Thamma Raksa Phase 1,Thailand,Reforestation,1250.5,12500,18750,82.3,2025-Q1,Active,Verra VCS
+NBS-ID-01,Amanah Kalimantan,Indonesia,Mangrove Restoration,850.0,8500,12750,75.8,2025-Q1,Active,Gold Standard
+NBS-VN-01,Mekong Delta Mangrove,Vietnam,Blue Carbon,620.3,6200,9305,88.1,2025-Q1,Pending,Verra VCS
+NBS-CN-01,Yangtze Wetland,China,Wetland Restoration,2100.0,21000,31500,91.2,2025-Q2,Active,Gold Standard
+NBS-TH-02,Thamma Raksa Phase 2,Thailand,Reforestation,980.0,9800,14700,79.5,2025-Q2,Active,Verra VCS
+NBS-ID-02,Sumatera Corridor,Indonesia,Forest Protection,1580.0,15800,23700,84.6,2025-Q2,Active,Gold Standard
+NBS-VN-02,Central Highlands,Vietnam,Agroforestry,440.0,4400,6600,71.3,2025-Q3,Active,Verra VCS
+NBS-TH-03,Northern Thailand Buffer,Thailand,Reforestation,720.0,7200,10800,76.9,2025-Q3,Active,Gold Standard
