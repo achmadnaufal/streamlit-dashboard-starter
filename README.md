@@ -37,3 +37,25 @@ chart_data = dash.carbon_progress_chart_data(df, target_credits=150000)
 ```bash
 pytest tests/ -v
 ```
+
+---
+
+## [v1.3.0] Carbon Credit Projection & Biodiversity Scoring
+
+```python
+# 5-year carbon credit revenue projection
+projection = dash.carbon_credit_projection(
+    project_df, years=5, price_per_credit_usd=18.0, annual_growth_rate=0.07
+)
+print(projection[["year", "projected_area_ha", "estimated_credits_tco2", "revenue_usd"]])
+# year  projected_area_ha  estimated_credits_tco2    revenue_usd
+#    1             5800.0               49300.0     887400.0
+#    5             7631.9               64871.0    1167678.0
+
+# Biodiversity scoring per project
+bio = dash.biodiversity_score(project_df)
+print(bio[["project_id", "biodiversity_score", "classification"]])
+# NBS-CN-01  100.0  Excellent
+# NBS-VN-01   86.7  Excellent
+# NBS-TH-01   75.0  Good
+```

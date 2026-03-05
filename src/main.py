@@ -204,3 +204,104 @@ class StreamlitDashboardStarter:
             else:
                 rows.append({"metric": k, "value": v})
         return pd.DataFrame(rows)
+
+
+    def carbon_credit_projection(
+        self,
+        df: pd.DataFrame,
+        years: int = 5,
+        price_per_credit_usd: float = 15.0,
+        annual_growth_rate: float = 0.05,
+    ) -> pd.DataFrame:
+        """
+        Project carbon credit issuance and revenue over multiple years.
+
+        Uses area planted, emission factor, and annual growth rate to model
+        future carbon credit issuance aligned with Verra VCS monitoring cycles.
+
+        Args:
+            df: NbS project DataFrame with area_ha and optionally carbon_credits_issued.
+            years: Number of years to project.
+            price_per_credit_usd: Carbon credit price in USD (default $15).
+            annual_growth_rate: Annual area growth rate as decimal (default 5%).
+
+        Returns:
+            DataFrame with year, projected_area_ha, estimated_credits_tco2,
+            revenue_usd, cumulative_credits, cumulative_revenue_usd.
+
+        Raises:
+            ValueError: If area_ha column missing.
+        """
+        df = self.preprocess(df)
+        if "area_ha" not in df.columns:
+            raise ValueError("Column 'area_ha' required for carbon credit projection")
+        if price_per_credit_usd <= 0:
+            raise ValueError("price_per_credit_usd must be positive")
+
+        base_area = float(df["area_ha"].sum())
+        rows = []
+        cum_credits = 0.0
+        cum_revenue = 0.0
+        for y in range(1, years + 1):
+            area = base_area * (1 + annual_growth_rate) ** (y - 1)
+            credits = area * self.emission_factor  # tCO2/year
+            revenue = credits * price_per_credit_usd
+            cum_credits += credits
+            cum_revenue += revenue
+            rows.append({
+                "year": y,
+                "projected_area_ha": round(area, 1),
+                "estimated_credits_tco2": round(credits, 1),
+                "revenue_usd": round(revenue, 2),
+                "cumulative_credits_tco2": round(cum_credits, 1),
+                "cumulative_revenue_usd": round(cum_revenue, 2),
+            })
+        return pd.DataFrame(rows)
+
+    def biodiversity_score(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate biodiversity improvement scores for NbS projects.
+
+        Scores are calculated as: species_count normalized to 0-100 scale,
+        adjusted for area and baseline. Projects above baseline score 'positive',
+        below score 'neutral' or 'negative'.
+
+        Args:
+            df: Project DataFrame with project_id, species_count, area_ha columns.
+
+        Returns:
+            DataFrame with project_id, biodiversity_score, classification
+            (Excellent/Good/Baseline/Below Baseline).
+        """
+        df = self.preprocess(df)
+        required = ["species_count", "area_ha"]
+        missing = [c for c in required if c not in df.columns]
+        if missing:
+            raise ValueError(f"Missing columns for biodiversity score: {missing}")
+
+        group_col = "project_id" if "project_id" in df.columns else None
+        if group_col:
+            agg = df.groupby(group_col).agg(
+                total_area_ha=("area_ha", "sum"),
+                total_species=("species_count", "sum"),
+            ).reset_index()
+        else:
+            agg = df[["area_ha", "species_count"]].copy()
+            agg = agg.rename(columns={"area_ha": "total_area_ha", "species_count": "total_species"})
+
+        max_sp = agg["total_species"].max()
+        agg["biodiversity_score"] = (agg["total_species"] / max(max_sp, 1) * 100).round(1)
+        baseline = self.biodiversity_baseline
+
+        def classify(score: float) -> str:
+            """Classify biodiversity score against baseline."""
+            if score >= 80:
+                return "Excellent"
+            if score >= baseline:
+                return "Good"
+            if score >= baseline * 0.7:
+                return "Baseline"
+            return "Below Baseline"
+
+        agg["classification"] = agg["biodiversity_score"].apply(classify)
+        return agg.sort_values("biodiversity_score", ascending=False).reset_index(drop=True)

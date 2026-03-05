@@ -88,3 +88,52 @@ class TestCarbonProgressChartData:
         df = pd.DataFrame({"project_id": ["X"], "area_ha": [100], "carbon_credits_issued": [1000]})
         with pytest.raises(ValueError, match="period"):
             dash.carbon_progress_chart_data(df)
+
+
+class TestCarbonCreditProjection:
+    def test_returns_dataframe(self, dash, project_df):
+        result = dash.carbon_credit_projection(project_df)
+        assert isinstance(result, pd.DataFrame)
+
+    def test_default_5_years(self, dash, project_df):
+        result = dash.carbon_credit_projection(project_df)
+        assert len(result) == 5
+
+    def test_cumulative_credits_increasing(self, dash, project_df):
+        result = dash.carbon_credit_projection(project_df)
+        cum = result["cumulative_credits_tco2"].tolist()
+        assert cum == sorted(cum)
+
+    def test_negative_price_raises(self, dash, project_df):
+        with pytest.raises(ValueError, match="positive"):
+            dash.carbon_credit_projection(project_df, price_per_credit_usd=-5.0)
+
+    def test_missing_area_ha_raises(self, dash):
+        df = pd.DataFrame({"project_id": ["P1"], "species_count": [30]})
+        with pytest.raises(ValueError, match="area_ha"):
+            dash.carbon_credit_projection(df)
+
+    def test_custom_years(self, dash, project_df):
+        result = dash.carbon_credit_projection(project_df, years=10)
+        assert len(result) == 10
+
+
+class TestBiodiversityScore:
+    def test_returns_dataframe(self, dash, project_df):
+        result = dash.biodiversity_score(project_df)
+        assert isinstance(result, pd.DataFrame)
+
+    def test_score_in_range(self, dash, project_df):
+        result = dash.biodiversity_score(project_df)
+        assert (result["biodiversity_score"] >= 0).all()
+        assert (result["biodiversity_score"] <= 100).all()
+
+    def test_classification_column(self, dash, project_df):
+        result = dash.biodiversity_score(project_df)
+        valid_classes = {"Excellent", "Good", "Baseline", "Below Baseline"}
+        assert set(result["classification"]).issubset(valid_classes)
+
+    def test_missing_species_raises(self, dash):
+        df = pd.DataFrame({"project_id": ["P1"], "area_ha": [100.0]})
+        with pytest.raises(ValueError, match="Missing columns"):
+            dash.biodiversity_score(df)

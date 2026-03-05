@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-05
+### Added
+- `carbon_credit_projection()`: multi-year carbon credit issuance and revenue projection with growth modeling
+- `biodiversity_score()`: per-project biodiversity scoring and classification (Excellent/Good/Baseline/Below Baseline)
+- 10 new unit tests covering carbon projection and biodiversity scoring
+### Improved
+- README updated with carbon projection table and biodiversity classification usage
+
 ## [1.2.0] - 2026-03-04
 ### Added
 - `nbs_kpi_summary()`: portfolio-level KPIs (area, carbon credits, sequestration, biodiversity)
